@@ -40,6 +40,8 @@
     min-height: 100vh;
     overflow-x: hidden;
     cursor: default;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
   }
 
   /* ── Fine grid background ── */
@@ -176,7 +178,8 @@
     letter-spacing: 0.18em;
     color: var(--text-muted);
     display: flex;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 10px 20px;
     align-items: center;
   }
   .subtitle span { display: flex; align-items: center; gap: 8px; }
@@ -201,6 +204,7 @@
     align-items: center;
     gap: 14px;
   }
+  .section-gap { margin-top: 40px; }
   .section-label::after {
     content: '';
     flex: 1;
@@ -537,18 +541,145 @@
   }
   @keyframes countUp { from { opacity: 0; } to { opacity: 1; } }
 
-  /* ── Responsive ── */
+  /* ══════════════════════════════
+     RESPONSIVE — LARGE TABLET (≤1100px)
+  ══════════════════════════════ */
   @media (max-width: 1100px) {
+    .page { padding: 0 32px 72px; }
     .kpis { grid-template-columns: repeat(3, 1fr); }
     .charts-row.two-thirds { grid-template-columns: 1fr; }
     .charts-row.half { grid-template-columns: 1fr; }
-    .donut-layout { flex-direction: column; align-items: flex-start; }
+    .donut-layout { flex-direction: row; align-items: center; gap: 28px; }
+    .donut-chart-wrap { width: 180px; height: 180px; }
   }
-  @media (max-width: 700px) {
-    .page { padding: 0 20px 60px; }
-    .kpis { grid-template-columns: repeat(2, 1fr); }
-    header { flex-direction: column; gap: 20px; align-items: flex-start; }
+
+  /* ══════════════════════════════
+     RESPONSIVE — TABLET (≤768px)
+  ══════════════════════════════ */
+  @media (max-width: 768px) {
+    .page { padding: 0 24px 60px; }
+
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 24px 0 20px;
+      margin-bottom: 36px;
+    }
+    .header-right { text-align: left; }
+    .report-period { font-size: 18px; }
+    .logo-wrap { width: 52px; height: 52px; }
+
+    .page-title-block { margin-bottom: 36px; }
+    h1 { font-size: clamp(28px, 7vw, 42px); }
+
+    .kpis {
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 40px;
+    }
+    .kpi { padding: 22px 18px 18px; }
+    .kpi-value { font-size: clamp(18px, 3.5vw, 26px); }
+    .kpi-label { font-size: 13px; }
+
+    .chart-card { padding: 24px 20px; }
+    .chart-title { font-size: 17px; }
+    .chart-wrap.tall { height: 240px; }
+    .chart-wrap.medium { height: 200px; }
+
+    .donut-layout { flex-direction: column; align-items: center; gap: 20px; }
+    .donut-chart-wrap { width: 160px; height: 160px; }
+    .donut-legend { width: 100%; max-width: 340px; }
+
+    .empresa-row { gap: 12px; }
+    .section-gap { margin-top: 28px; }
+
     .provider-bar-cell { display: none; }
+
+    footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 48px;
+    }
+    .footer-right { text-align: left; }
+  }
+
+  /* ══════════════════════════════
+     RESPONSIVE — PHONE (≤480px)
+  ══════════════════════════════ */
+  @media (max-width: 480px) {
+    .page { padding: 0 16px 48px; }
+
+    header {
+      padding: 18px 0 16px;
+      margin-bottom: 28px;
+      gap: 14px;
+    }
+    .logo-wrap { width: 44px; height: 44px; }
+    .firm-name { font-size: 11px; letter-spacing: 0.18em; }
+    .firm-tagline { font-size: 10px; }
+    .report-label { font-size: 9px; }
+    .report-period { font-size: 16px; }
+
+    .page-title-block { margin-bottom: 28px; }
+    .eyebrow { font-size: 9px; }
+    h1 { font-size: clamp(24px, 8.5vw, 34px); }
+    .subtitle { font-size: 10px; gap: 8px 14px; margin-top: 10px; }
+
+    .section-label { font-size: 9px; margin-bottom: 14px; }
+    .section-gap { margin-top: 22px; }
+
+    .kpis {
+      grid-template-columns: repeat(2, 1fr);
+      margin-bottom: 28px;
+    }
+    /* 5th KPI spans both columns */
+    .kpi:nth-child(5) { grid-column: 1 / -1; }
+
+    .kpi { padding: 16px 14px 14px; }
+    .kpi-index { font-size: 8px; margin-bottom: 10px; }
+    .kpi-value { font-size: clamp(17px, 5vw, 22px); min-height: 24px; margin-bottom: 7px; }
+    .kpi-label { font-size: 12px; }
+    .kpi-sub { font-size: 8px; margin-top: 4px; }
+
+    .chart-card { padding: 16px 14px; }
+    .chart-title { font-size: 15px; }
+    .chart-subtitle { font-size: 9px; margin-bottom: 18px; letter-spacing: 0.1em; }
+    .chart-wrap.tall { height: 195px; }
+    .chart-wrap.medium { height: 170px; }
+
+    .donut-chart-wrap { width: 130px; height: 130px; }
+    .donut-item { padding: 11px 0; }
+    .donut-item-name { font-size: 13px; }
+    .donut-item-val { font-size: 10px; }
+    .donut-item-pct { font-size: 12px; }
+
+    .empresa-row { gap: 8px; padding: 10px 0; }
+    .empresa-name { font-size: 13px; }
+    .empresa-monto { font-size: 11px; }
+    .empresa-pct { font-size: 10px; }
+
+    .providers-table td { padding: 10px 0; }
+    .provider-rank { padding-right: 10px; width: 20px; font-size: 9px; }
+    .provider-name { font-size: 13px; }
+    .provider-name small { display: none; }
+    .provider-monto { font-size: 12px; }
+    .providers-table th { font-size: 8px; padding-bottom: 10px; }
+
+    footer { margin-top: 36px; padding-top: 20px; }
+    .footer-left, .footer-right { font-size: 9px; }
+  }
+
+  /* ══════════════════════════════
+     RESPONSIVE — TINY (≤360px)
+  ══════════════════════════════ */
+  @media (max-width: 360px) {
+    .page { padding: 0 12px 40px; }
+    .kpi { padding: 14px 12px 12px; }
+    .kpi-value { font-size: 16px; }
+    .chart-card { padding: 14px 12px; }
+    .chart-wrap.tall { height: 175px; }
+    .donut-chart-wrap { width: 110px; height: 110px; }
   }
 </style>
 </head>
@@ -662,7 +793,7 @@
   </div>
 
   <!-- ══ ROW 2: Empresas ══ -->
-  <div class="section-label" style="margin-top:40px;">Concentración por Empresa</div>
+  <div class="section-label section-gap">Concentración por Empresa</div>
   <div class="chart-card" style="margin-bottom:24px; animation-delay:0.4s;">
     <div class="chart-title">Resumen por Empresa</div>
     <div class="chart-subtitle">Participación sobre monto total — Millones CLP</div>
@@ -711,7 +842,7 @@
   </div>
 
   <!-- ══ ROW 3: Top Proveedores ══ -->
-  <div class="section-label" style="margin-top:40px;">Top 10 Proveedores</div>
+  <div class="section-label section-gap">Top 10 Proveedores</div>
   <div class="chart-card" style="animation-delay:0.5s;">
     <div class="chart-title">Proveedores por Monto Total</div>
     <div class="chart-subtitle">Ranking de concentración de compras — Millones CLP</div>
