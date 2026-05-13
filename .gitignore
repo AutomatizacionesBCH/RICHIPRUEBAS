@@ -1,0 +1,12 @@
+# Excel temp files
+~$*.xlsx
+~$*.xls
+
+# Cache / temp
+.firecrawl/
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db

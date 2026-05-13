@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard SII — Compras 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cinzel:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:          #070e07;
+    --surface:     #0c160c;
+    --card:        #101a10;
+    --card-hover:  #131f13;
+    --gold:        #c9a84c;
+    --gold-light:  #e8c97a;
+    --gold-dim:    rgba(201,168,76,0.12);
+    --gold-border: rgba(201,168,76,0.22);
+    --green-deep:  #1a3a1a;
+    --green-mid:   #2d5a2d;
+    --green-accent:#4a8c4a;
+    --text:        #f0ebe0;
+    --text-muted:  #7a9a7a;
+    --text-dim:    #4a6a4a;
+    --border:      rgba(255,255,255,0.05);
+    --radius:      2px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── Fine grid background ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Ambient glow ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -30vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80vw;
+    height: 60vh;
+    background: radial-gradient(ellipse, rgba(45,90,45,0.18) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page { position: relative; z-index: 1; max-width: 1480px; margin: 0 auto; padding: 0 40px 80px; }
+
+  /* ══════════════════════════════
+     HEADER
+  ══════════════════════════════ */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 36px 0 32px;
+    border-bottom: 1px solid var(--gold-border);
+    margin-bottom: 56px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 24px; }
+
+  .logo-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--gold-border);
+    box-shadow: 0 0 24px rgba(201,168,76,0.08);
+  }
+
+  .logo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .firm-info {}
+  .firm-name {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .firm-tagline {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-top: 3px;
+  }
+
+  .header-right { text-align: right; }
+  .report-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .report-period {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+
+  /* ══════════════════════════════
+     PAGE TITLE
+  ══════════════════════════════ */
+  .page-title-block {
+    margin-bottom: 52px;
+    animation: fadeUp 0.9s 0.1s ease both;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .subtitle {
+    margin-top: 14px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--text-muted);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .subtitle span { display: flex; align-items: center; gap: 8px; }
+  .subtitle span::before {
+    content: '◆';
+    font-size: 5px;
+    color: var(--gold);
+    opacity: 0.7;
+  }
+  .subtitle span:first-child::before { display: none; }
+
+  /* ══════════════════════════════
+     SECTION LABEL
+  ══════════════════════════════ */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* ══════════════════════════════
+     KPI CARDS
+  ══════════════════════════════ */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--gold-border);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius);
+    margin-bottom: 64px;
+    overflow: hidden;
+  }
+
+  .kpi {
+    background: var(--card);
+    padding: 32px 28px 28px;
+    position: relative;
+    transition: background 0.3s ease;
+    animation: fadeUp 0.8s ease both;
+    overflow: hidden;
+  }
+  .kpi:nth-child(1) { animation-delay: 0.15s; }
+  .kpi:nth-child(2) { animation-delay: 0.22s; }
+  .kpi:nth-child(3) { animation-delay: 0.29s; }
+  .kpi:nth-child(4) { animation-delay: 0.36s; }
+  .kpi:nth-child(5) { animation-delay: 0.43s; }
+
+  .kpi:hover { background: var(--card-hover); }
+
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .kpi:hover::before { opacity: 1; }
+
+  .kpi-index {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .kpi-value {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(22px, 2.2vw, 30px);
+    font-weight: 400;
+    color: var(--gold-light);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 10px;
+    min-height: 36px;
+  }
+
+  .kpi-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+  }
+
+  .kpi-sub {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* ══════════════════════════════
+     CHART GRID
+  ══════════════════════════════ */
+  .charts-row {
+    display: grid;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .charts-row.two-thirds { grid-template-columns: 2fr 1fr; }
+  .charts-row.half      { grid-template-columns: 1fr 1fr; }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.9s ease both;
+  }
+  .chart-card:nth-child(1) { animation-delay: 0.3s; }
+  .chart-card:nth-child(2) { animation-delay: 0.45s; }
+
+  .chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-border), transparent);
+  }
+
+  .chart-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+  .chart-subtitle {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .chart-wrap { position: relative; }
+  .chart-wrap.tall { height: 280px; }
+  .chart-wrap.medium { height: 240px; }
+  .chart-wrap.donut { height: 240px; display: flex; align-items: center; justify-content: center; }
+
+  /* ── Donut legend ── */
+  .donut-layout { display: flex; align-items: center; gap: 32px; }
+  .donut-chart-wrap { width: 200px; height: 200px; flex-shrink: 0; }
+  .donut-legend { flex: 1; }
+  .donut-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .donut-item:last-child { border-bottom: none; }
+  .donut-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .donut-item-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .donut-item-val {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .donut-item-pct {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Empresa rows ── */
+  .empresa-list { display: flex; flex-direction: column; gap: 0; }
+  .empresa-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .empresa-row:last-child { border-bottom: none; }
+  .empresa-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .empresa-bar-bg {
+    height: 2px;
+    background: var(--green-deep);
+    border-radius: 1px;
+    overflow: hidden;
+    width: 100%;
+  }
+  .empresa-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--green-accent), var(--gold));
+    border-radius: 1px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .empresa-bar-fill.animate { transform: scaleX(1); }
+  .empresa-monto {
+    font-size: 12px;
+    color: var(--gold-light);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    font-weight: 400;
+  }
+  .empresa-pct {
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ══════════════════════════════
+     PROVIDERS TABLE
+  ══════════════════════════════ */
+  .providers-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .providers-table thead tr {
+    border-bottom: 1px solid var(--gold-border);
+  }
+  .providers-table th {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    padding: 0 0 14px;
+    text-align: left;
+    font-weight: 400;
+  }
+  .providers-table th:last-child { text-align: right; }
+  .providers-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .providers-table tbody tr:hover { background: var(--card-hover); }
+  .providers-table td {
+    padding: 14px 0;
+    vertical-align: middle;
+  }
+  .provider-rank {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    padding-right: 20px;
+    width: 32px;
+  }
+  .provider-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .provider-name small {
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    margin-top: 3px;
+  }
+  .provider-bar-cell {
+    width: 200px;
+    padding: 0 24px;
+  }
+  .provider-bar-bg {
+    height: 3px;
+    background: var(--green-deep);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .provider-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--green-mid), var(--gold));
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .provider-bar-fill.animate { transform: scaleX(1); }
+  .provider-monto {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--gold-light);
+    text-align: right;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+
+  /* ══════════════════════════════
+     FOOTER
+  ══════════════════════════════ */
+  footer {
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeUp 1s 0.6s ease both;
+  }
+  .footer-left {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+  }
+  .footer-right {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-align: right;
+  }
+  .footer-gold { color: var(--gold); }
+
+  /* ══════════════════════════════
+     ANIMATIONS
+  ══════════════════════════════ */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes countUp { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .kpis { grid-template-columns: repeat(3, 1fr); }
+    .charts-row.two-thirds { grid-template-columns: 1fr; }
+    .charts-row.half { grid-template-columns: 1fr; }
+    .donut-layout { flex-direction: column; align-items: flex-start; }
+  }
+  @media (max-width: 700px) {
+    .page { padding: 0 20px 60px; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    header { flex-direction: column; gap: 20px; align-items: flex-start; }
+    .provider-bar-cell { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HEADER ══ -->
+  <header>
+    <div class="header-left">
+      <div class="logo-wrap">
+        <img src="Logo/logo.png" alt="Logo" onerror="this.parentElement.style.background='#1a3a1a'">
+      </div>
+      <div class="firm-info">
+        <div class="firm-name">Consolidado SII</div>
+        <div class="firm-tagline">Gestión Tributaria &amp; Análisis Contable</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="report-label">Período de análisis</div>
+      <div class="report-period">Enero — Diciembre 2025</div>
+    </div>
+  </header>
+
+  <!-- ══ PAGE TITLE ══ -->
+  <div class="page-title-block">
+    <div class="eyebrow">Dashboard de Compras</div>
+    <h1>Resumen <em>Tributario</em><br>Compras 2025</h1>
+    <div class="subtitle">
+      <span>5 Empresas</span>
+      <span>12 Meses</span>
+      <span>3,593 Documentos</span>
+      <span>Consolidado SII</span>
+    </div>
+  </div>
+
+  <!-- ══ KPI CARDS ══ -->
+  <div class="section-label">Indicadores Principales</div>
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi-index">01</div>
+      <div class="kpi-value" data-target="3593" data-format="int">—</div>
+      <div class="kpi-label">Total Documentos</div>
+      <div class="kpi-sub">Facturas &amp; Boletas</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-index">02</div>
+      <div class="kpi-value" data-target="301.94" data-format="millon">—</div>
+      <div class="kpi-label">Monto Neto</div>
+      <div class="kpi-sub">Base imponible total</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-index">03</div>
+      <div class="kpi-value" data-target="53.81" data-format="millon">—</div>
+      <div class="kpi-label">IVA Recuperable</div>
+      <div class="kpi-sub">Crédito fiscal 2025</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-index">04</div>
+      <div class="kpi-value" data-target="369.78" data-format="millon">—</div>
+      <div class="kpi-label">Monto Total</div>
+      <div class="kpi-sub">Flujo bruto compras</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-index">05</div>
+      <div class="kpi-value" data-target="6.51" data-format="millon">—</div>
+      <div class="kpi-label">Monto Exento</div>
+      <div class="kpi-sub">Sin carga tributaria</div>
+    </div>
+  </div>
+
+  <!-- ══ ROW 1: Compras por Mes + Tipo ══ -->
+  <div class="section-label">Análisis Temporal y Clasificación</div>
+  <div class="charts-row two-thirds" style="margin-bottom:24px;">
+
+    <div class="chart-card">
+      <div class="chart-title">Compras por Mes</div>
+      <div class="chart-subtitle">Monto total mensual — Millones CLP</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartMeses"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Tipo de Compra</div>
+      <div class="chart-subtitle">Distribución por categoría tributaria</div>
+      <div class="donut-layout" style="margin-top:8px;">
+        <div class="donut-chart-wrap">
+          <canvas id="chartTipo"></canvas>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-item">
+            <div class="donut-dot" style="background:#c9a84c;"></div>
+            <div>
+              <div class="donut-item-name">Del Giro</div>
+              <div class="donut-item-val">$347.46M CLP</div>
+            </div>
+            <div class="donut-item-pct">94%</div>
+          </div>
+          <div class="donut-item">
+            <div class="donut-dot" style="background:#2d5a2d;"></div>
+            <div>
+              <div class="donut-item-name">IVA no Recuperable</div>
+              <div class="donut-item-val">$22.32M CLP</div>
+            </div>
+            <div class="donut-item-pct">6%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ ROW 2: Empresas ══ -->
+  <div class="section-label" style="margin-top:40px;">Concentración por Empresa</div>
+  <div class="chart-card" style="margin-bottom:24px; animation-delay:0.4s;">
+    <div class="chart-title">Resumen por Empresa</div>
+    <div class="chart-subtitle">Participación sobre monto total — Millones CLP</div>
+    <div class="empresa-list">
+      <div class="empresa-row">
+        <div class="empresa-name">
+          Puerto Querido SpA
+          <div class="empresa-bar-bg"><div class="empresa-bar-fill" data-width="81.3"></div></div>
+        </div>
+        <div class="empresa-monto">$300.54M</div>
+        <div class="empresa-pct">81.3%</div>
+      </div>
+      <div class="empresa-row">
+        <div class="empresa-name">
+          My Kit SpA
+          <div class="empresa-bar-bg"><div class="empresa-bar-fill" data-width="11.2"></div></div>
+        </div>
+        <div class="empresa-monto">$41.46M</div>
+        <div class="empresa-pct">11.2%</div>
+      </div>
+      <div class="empresa-row">
+        <div class="empresa-name">
+          Profesionales de la Salud SpA
+          <div class="empresa-bar-bg"><div class="empresa-bar-fill" data-width="5.5"></div></div>
+        </div>
+        <div class="empresa-monto">$20.23M</div>
+        <div class="empresa-pct">5.5%</div>
+      </div>
+      <div class="empresa-row">
+        <div class="empresa-name">
+          Los Dibujantes SpA
+          <div class="empresa-bar-bg"><div class="empresa-bar-fill" data-width="1.0"></div></div>
+        </div>
+        <div class="empresa-monto">$3.83M</div>
+        <div class="empresa-pct">1.0%</div>
+      </div>
+      <div class="empresa-row">
+        <div class="empresa-name">
+          VR Therapy SpA
+          <div class="empresa-bar-bg"><div class="empresa-bar-fill" data-width="1.0"></div></div>
+        </div>
+        <div class="empresa-monto">$3.72M</div>
+        <div class="empresa-pct">1.0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ROW 3: Top Proveedores ══ -->
+  <div class="section-label" style="margin-top:40px;">Top 10 Proveedores</div>
+  <div class="chart-card" style="animation-delay:0.5s;">
+    <div class="chart-title">Proveedores por Monto Total</div>
+    <div class="chart-subtitle">Ranking de concentración de compras — Millones CLP</div>
+    <table class="providers-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Proveedor</th>
+          <th class="provider-bar-cell" style="padding:0 24px;">Participación</th>
+          <th style="text-align:right;">Monto Total</th>
+        </tr>
+      </thead>
+      <tbody id="proveedoresBody"></tbody>
+    </table>
+  </div>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="footer-left">
+      Consolidado SII &nbsp;·&nbsp; Período Enero–Diciembre <span class="footer-gold">2025</span>
+    </div>
+    <div class="footer-right">
+      Generado el 12 de mayo de 2025 &nbsp;·&nbsp;
+      <span class="footer-gold">Confidencial</span>
+    </div>
+  </footer>
+
+</div><!-- /page -->
+
+<script>
+/* ════════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+const MESES_DATA = {
+  labels: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+  values: [30.35, 23.26, 26.11, 25.90, 28.47, 27.48, 28.55, 35.03, 31.03, 40.67, 35.46, 37.47]
+};
+
+const PROVEEDORES = [
+  { name: 'Comercializadora Ricardo Rojas Torres E.',  short: 'Com. Ricardo Rojas Torres', monto: 54.85 },
+  { name: 'Delivery Hero E-Commerce Chile SPA',        short: 'Delivery Hero Chile',        monto: 41.18 },
+  { name: 'GPI SPA',                                   short: 'GPI SPA',                    monto: 37.60 },
+  { name: 'Panificadora Olfos y Andreani S.P.',        short: 'Panificadora Olfos y And.',  monto: 24.20 },
+  { name: 'Clínica Alemana de Santiago S.A.',          short: 'Clínica Alemana Stgo.',       monto: 16.99 },
+  { name: 'Nicolás Orlando Severino Díaz',             short: 'N. O. Severino Díaz',         monto: 12.63 },
+  { name: 'Grizel Severino Vargas',                    short: 'G. Severino Vargas',          monto: 11.78 },
+  { name: 'Consorcio Industrial de Alimentos S.A.',    short: 'Cons. Ind. Alimentos',        monto: 11.57 },
+  { name: 'Dist. Nicolás Severino EIRL',               short: 'Dist. N. Severino EIRL',      monto: 7.95  },
+  { name: 'Admin. Supermercados Express Ltda.',        short: 'Admin. Superm. Express',      monto: 7.81  },
+];
+
+/* ════════════════════════════════════════
+   KPI COUNT-UP
+════════════════════════════════════════ */
+function countUp(el, target, format, duration = 1600) {
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const val = ease * target;
+    if (format === 'int') {
+      el.textContent = Math.round(val).toLocaleString('es-CL');
+    } else if (format === 'millon') {
+      el.textContent = '$' + val.toFixed(2) + 'M';
+    }
+    if (t < 1) requestAnimationFrame(tick);
+    else {
+      if (format === 'int') el.textContent = target.toLocaleString('es-CL');
+      else el.textContent = '$' + target.toFixed(2) + 'M';
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ════════════════════════════════════════
+   CHART: MESES (Vertical Bar)
+════════════════════════════════════════ */
+function initChartMeses() {
+  const ctx = document.getElementById('chartMeses').getContext('2d');
+  const max = Math.max(...MESES_DATA.values);
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+  gradient.addColorStop(0,   'rgba(201,168,76,0.85)');
+  gradient.addColorStop(0.5, 'rgba(74,140,74,0.6)');
+  gradient.addColorStop(1,   'rgba(45,90,45,0.2)');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: MESES_DATA.labels,
+      datasets: [{
+        data: MESES_DATA.values,
+        backgroundColor: MESES_DATA.values.map(v =>
+          v === max ? 'rgba(201,168,76,0.9)' : gradient
+        ),
+        borderColor: MESES_DATA.values.map(v =>
+          v === max ? '#c9a84c' : 'rgba(74,140,74,0.4)'
+        ),
+        borderWidth: 1,
+        borderRadius: 1,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 1400,
+        easing: 'easeOutQuart',
+        delay: ctx => ctx.dataIndex * 60,
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0c160c',
+          borderColor: 'rgba(201,168,76,0.4)',
+          borderWidth: 1,
+          titleColor: '#c9a84c',
+          bodyColor: '#f0ebe0',
+          titleFont: { family: 'DM Mono', size: 11 },
+          bodyFont: { family: 'Cormorant Garamond', size: 14 },
+          callbacks: {
+            title: items => items[0].label,
+            label: item => ' $' + item.raw.toFixed(2) + 'M CLP',
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+          ticks: { color: '#7a9a7a', font: { family: 'DM Mono', size: 10 }, letterSpacing: '0.1em' },
+          border: { color: 'transparent' },
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+          ticks: {
+            color: '#7a9a7a',
+            font: { family: 'DM Mono', size: 10 },
+            callback: v => '$' + v + 'M',
+            maxTicksLimit: 6,
+          },
+          border: { color: 'transparent' },
+        }
+      }
+    }
+  });
+}
+
+/* ════════════════════════════════════════
+   CHART: TIPO (Donut)
+════════════════════════════════════════ */
+function initChartTipo() {
+  const ctx = document.getElementById('chartTipo').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Del Giro', 'IVA no Recuperable'],
+      datasets: [{
+        data: [347.46, 22.32],
+        backgroundColor: ['rgba(201,168,76,0.85)', 'rgba(45,90,45,0.8)'],
+        borderColor:      ['rgba(201,168,76,0.3)',  'rgba(74,140,74,0.3)'],
+        borderWidth: 1,
+        hoverBackgroundColor: ['rgba(232,201,122,0.9)', 'rgba(74,140,74,0.9)'],
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '72%',
+      animation: { duration: 1400, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0c160c',
+          borderColor: 'rgba(201,168,76,0.4)',
+          borderWidth: 1,
+          titleColor: '#c9a84c',
+          bodyColor: '#f0ebe0',
+          callbacks: {
+            label: item => ' $' + item.raw.toFixed(2) + 'M CLP',
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ════════════════════════════════════════
+   PROVIDERS TABLE
+════════════════════════════════════════ */
+function buildProveedores() {
+  const tbody = document.getElementById('proveedoresBody');
+  const maxM = PROVEEDORES[0].monto;
+  PROVEEDORES.forEach((p, i) => {
+    const pct = (p.monto / maxM * 100).toFixed(0);
+    const delay = (i * 0.08).toFixed(2);
+    const tr = document.createElement('tr');
+    tr.style.animation = `fadeUp 0.6s ${delay}s ease both`;
+    tr.innerHTML = `
+      <td class="provider-rank">0${i+1}</td>
+      <td>
+        <div class="provider-name">
+          ${p.name}
+          <small>${p.short}</small>
+        </div>
+      </td>
+      <td class="provider-bar-cell">
+        <div class="provider-bar-bg">
+          <div class="provider-bar-fill" data-width="${pct}" style="width:100%;"></div>
+        </div>
+      </td>
+      <td class="provider-monto">$${p.monto.toFixed(2)}M</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ════════════════════════════════════════
+   INTERSECTION OBSERVER — animate on scroll
+════════════════════════════════════════ */
+function setupObserver() {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // KPI count-up
+        entry.target.querySelectorAll('[data-target]').forEach(el => {
+          const t = parseFloat(el.dataset.target);
+          const f = el.dataset.format;
+          countUp(el, t, f, 1600);
+        });
+        // Bar fills
+        entry.target.querySelectorAll('.empresa-bar-fill, .provider-bar-fill').forEach(el => {
+          const w = parseFloat(el.dataset.width);
+          el.style.transform = `scaleX(${w/100})`;
+          el.classList.add('animate');
+        });
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.kpis, .empresa-list, #proveedoresBody').forEach(el => io.observe(el));
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  Chart.defaults.color = '#7a9a7a';
+  Chart.defaults.font.family = 'DM Mono';
+
+  initChartMeses();
+  initChartTipo();
+  buildProveedores();
+  setupObserver();
+});
+</script>
+</body>
+</html>
